@@ -1,24 +1,54 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
   }
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background-color: white;
+  font-family: "Inter", sans-serif;
 }
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+
+  .engagement-controls .ant-select-selector,
+  .engagement-controls .ant-input {
+    border-radius: 6px;
+  }
+
+  .engagement-controls .ant-btn {
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .engagement-controls .ant-badge-count {
+    border-radius: 10px;
+    box-shadow: none;
+    padding: 0 8px;
+    height: 22px;
+    line-height: 22px;
+    font-weight: normal;
+  }
+
+  @media (max-width: 767px) {
+    .engagement-controls .ant-space {
+      margin-bottom: 16px;
+    }
+  }
