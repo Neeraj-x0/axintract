@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
-  Table, 
+  Table,
   Checkbox,
   Badge,
   Avatar,
@@ -11,9 +11,9 @@ import {
   Typography,
   Drawer,
   List,
-  Card,
   Divider,
   Grid,
+  Skeleton,
 } from "antd";
 import {
   EyeOutlined,
@@ -23,10 +23,8 @@ import {
   UserOutlined,
   InfoCircleOutlined,
   TagOutlined,
-  MoreOutlined,
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
-import { useState, useEffect } from "react";
 
 const { Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -37,12 +35,13 @@ const LeadsTable = ({
   leads,
   onSelect,
   selectedLeadIds,
+  loading = false,
 }) => {
   const [isMobileView, setIsMobileView] = useState(false);
   const [isTabletView, setIsTabletView] = useState(false);
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
-  
+
   // Use Ant Design's responsive breakpoints
   const screens = useBreakpoint();
 
@@ -167,7 +166,9 @@ const LeadsTable = ({
               {name ? getInitials(name) : null}
             </Avatar>
             <Space direction="vertical" size={0}>
-              <Text strong className="text-sm sm:text-base">{name || "Unknown"}</Text>
+              <Text strong className="text-sm sm:text-base">
+                {name || "Unknown"}
+              </Text>
             </Space>
           </Space>
         ),
@@ -181,6 +182,7 @@ const LeadsTable = ({
           <Badge
             status={getStatusColor(status)}
             text={<Text style={{ fontWeight: 500 }}>{status || "No status"}</Text>}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           />
         ),
       },
@@ -208,9 +210,14 @@ const LeadsTable = ({
           dataIndex: "category",
           key: "category",
           width: 120,
-          render: (category) => (
-            category ? <Tag color={getCategoryColor(category)}>{category.toUpperCase()}</Tag> : "-"
-          ),
+          render: (category) =>
+            category ? (
+              <Tag color={getCategoryColor(category)}>
+                {category.toUpperCase()}
+              </Tag>
+            ) : (
+              "-"
+            ),
         }
       );
     }
@@ -290,64 +297,75 @@ const LeadsTable = ({
             />
           ) : null}
           <Button
-          type="primary"
-          icon={<EyeOutlined />}
-          size="small"
-          href={`/user/leads/${record.id}`}
-          style={{
-            backgroundColor: "#ffffff",
-            borderColor: "#cdd0cf",
-            color: "#000000",
-            padding: "10px 10px",
-          }}
-        >
-          {screens.sm ? "View" : ""}
-        </Button>
+            type="primary"
+            icon={<EyeOutlined />}
+            size="small"
+            href={`/user/leads/${record.id}`}
+            style={{
+              backgroundColor: "#ffffff",
+              borderColor: "#cdd0cf",
+              color: "#000000",
+              padding: "10px 10px",
+            }}
+          >
+            {screens.sm ? "View" : ""}
+          </Button>
         </Space>
       ),
     });
 
     return baseColumns;
-  }, [screens, isAllSelected, handleChange, selectedLeadIds, onSelect, isTabletView]);
+  }, [
+    screens,
+    isAllSelected,
+    handleChange,
+    selectedLeadIds,
+    onSelect,
+    isTabletView,
+  ]);
 
   // Mobile view uses List component instead of Table
   const renderMobileList = () => {
     if (!isMobileView) return null;
-    
+
     return (
       <List
         className="leads-mobile-list"
         itemLayout="horizontal"
         dataSource={leads}
         renderItem={(lead) => (
-          <List.Item 
-            className={selectedLeadIds.includes(lead.id) ? "mobile-list-item-selected" : ""}
+          <List.Item
+            className={
+              selectedLeadIds.includes(lead.id)
+                ? "mobile-list-item-selected"
+                : ""
+            }
             actions={[
               <Button
-          type="primary"
-          icon={<EyeOutlined />}
-          size="small"
-          href={`/user/leads/${lead.id}`}
-          style={{
-            backgroundColor: "#ffffff",
-            color: "#000000",
-            borderColor: "#cdd0cf",
-            padding: "10px 10px",
-          }}
-        >
-          View
-        </Button>,
+                type="primary"
+                icon={<EyeOutlined />}
+                size="small"
+                href={`/user/leads/${lead.id}`}
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#000000",
+                  borderColor: "#cdd0cf",
+                  padding: "10px 10px",
+                }}
+              >
+                View
+              </Button>,
               <Button
                 key="info"
                 icon={<InfoCircleOutlined />}
                 size="small"
                 onClick={() => showLeadDetail(lead)}
-              />
+              />,
             ]}
           >
             <List.Item.Meta
               avatar={
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: "flex", alignItems: "center" }}>
                   <Checkbox
                     checked={selectedLeadIds.includes(lead.id)}
                     onChange={(e) => {
@@ -370,12 +388,15 @@ const LeadsTable = ({
                   <Text strong>{lead.name || "Unknown"}</Text>
                   <Badge
                     status={getStatusColor(lead.status)}
-                    text={<Text style={{ fontWeight: 500, fontSize: 12 }}>{lead.status || "No status"}</Text>}
+                    text={
+                      <Text style={{ fontWeight: 500, fontSize: 12 }}>
+                        {lead.status || "No status"}
+                      </Text>
+                    }
                     style={{ marginLeft: 8 }}
                   />
                 </div>
               }
-              
             />
           </List.Item>
         )}
@@ -386,13 +407,11 @@ const LeadsTable = ({
   // Mobile lead details drawer
   const renderLeadDetailDrawer = () => {
     if (!selectedLead) return null;
-    
+
     return (
       <Drawer
         title={
-          <div style={{ fontSize: '18px', fontWeight: 600 }}>
-            Lead Details
-          </div>
+          <div style={{ fontSize: "18px", fontWeight: 600 }}>Lead Details</div>
         }
         placement="right"
         onClose={() => setDetailVisible(false)}
@@ -409,35 +428,35 @@ const LeadsTable = ({
               {selectedLead.name ? getInitials(selectedLead.name) : null}
             </Avatar>
             <div className="ml-4">
-              <Text strong style={{ fontSize: '18px', display: 'block' }}>
+              <Text strong style={{ fontSize: "18px", display: "block" }}>
                 {selectedLead.name || "Unknown"}
               </Text>
               <Badge
                 status={getStatusColor(selectedLead.status)}
                 text={selectedLead.status || "No status"}
-                style={{ fontSize: '14px' }}
+                style={{ fontSize: "14px" }}
               />
             </div>
           </div>
-          
-          <Divider style={{ margin: '16px 0' }} />
-          
+
+          <Divider style={{ margin: "16px 0" }} />
+
           <div className="lead-info-section">
             <h4 className="section-title">Contact Information</h4>
             <div className="info-item">
-              <PhoneOutlined style={{ color: '#8c8c8c', marginRight: 8 }} />
+              <PhoneOutlined style={{ color: "#8c8c8c", marginRight: 8 }} />
               <Text>{selectedLead.phone || "N/A"}</Text>
             </div>
             <div className="info-item">
-              <MailOutlined style={{ color: '#8c8c8c', marginRight: 8 }} />
+              <MailOutlined style={{ color: "#8c8c8c", marginRight: 8 }} />
               <Text>{selectedLead.email || "N/A"}</Text>
             </div>
-            
-            <Divider style={{ margin: '16px 0' }} />
-            
+
+            <Divider style={{ margin: "16px 0" }} />
+
             <h4 className="section-title">Lead Details</h4>
             <div className="info-item">
-              <TagOutlined style={{ color: '#8c8c8c', marginRight: 8 }} />
+              <TagOutlined style={{ color: "#8c8c8c", marginRight: 8 }} />
               <Text>Category: </Text>
               {selectedLead.category ? (
                 <Tag color={getCategoryColor(selectedLead.category)}>
@@ -447,36 +466,45 @@ const LeadsTable = ({
                 <Text type="secondary">Not assigned</Text>
               )}
             </div>
-            
+
             <div className="info-item">
-              <CalendarOutlined style={{ color: '#8c8c8c', marginRight: 8 }} />
-              <Text>Last Activity: {selectedLead.lastActive || "No activity"}</Text>
+              <CalendarOutlined style={{ color: "#8c8c8c", marginRight: 8 }} />
+              <Text>
+                Last Activity: {selectedLead.lastActive || "No activity"}
+              </Text>
             </div>
-            
-                        {selectedLead.score !== undefined && (
+
+            {selectedLead.score !== undefined && (
               <div className="info-item">
-                <InfoCircleOutlined style={{ color: '#8c8c8c', marginRight: 8 }} />
+                <InfoCircleOutlined
+                  style={{ color: "#8c8c8c", marginRight: 8 }}
+                />
                 <Text>Score: </Text>
-                <Tag 
+                <Tag
                   color={
-                    selectedLead.score >= 80 ? "success" :
-                    selectedLead.score >= 50 ? "processing" :
-                    selectedLead.score >= 30 ? "warning" :
-                    selectedLead.score > 0 ? "error" : "default"
+                    selectedLead.score >= 80
+                      ? "success"
+                      : selectedLead.score >= 50
+                      ? "processing"
+                      : selectedLead.score >= 30
+                      ? "warning"
+                      : selectedLead.score > 0
+                      ? "error"
+                      : "default"
                   }
                 >
                   {selectedLead.score}
                 </Tag>
               </div>
             )}
-            <Divider style={{ margin: '16px 0' }} />
+            <Divider style={{ margin: "16px 0" }} />
             <h4 className="section-title">Notes</h4>
-            <Paragraph style={{ whiteSpace: 'pre-line' }}>
+            <Paragraph style={{ whiteSpace: "pre-line" }}>
               {selectedLead.note || "No notes available for this lead."}
             </Paragraph>
           </div>
-          
-          <div className="drawer-actions" style={{ marginTop: '24px' }}>
+
+          <div className="drawer-actions" style={{ marginTop: "24px" }}>
             <Button
               type="primary"
               icon={<EyeOutlined />}
@@ -496,92 +524,140 @@ const LeadsTable = ({
     );
   };
 
+  const renderSkeletonList = () => (
+    <List
+      className="leads-mobile-list"
+      itemLayout="horizontal"
+      dataSource={[1, 2, 3, 4, 5]}
+      renderItem={() => (
+        <List.Item>
+          <Skeleton
+            active
+            avatar
+            paragraph={{ rows: 1 }}
+            className="px-5 py-2"
+          />
+        </List.Item>
+      )}
+    />
+  );
+
+  const renderSkeletonTable = () => {
+    const skeletonColumns = columns.map((col) => ({
+      ...col,
+      render: () => (
+        <Skeleton.Input
+          active
+          size={screens.sm ? "default" : "small"}
+          style={{ width: "100%", minWidth: 50, height: "20px" }}
+        />
+      ),
+    }));
+
+    return (
+      <Table
+        columns={skeletonColumns}
+        dataSource={[...Array(5)].map((_, i) => ({ id: i }))}
+        pagination={false}
+        className="leads-custom-table"
+      />
+    );
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return isMobileView ? renderSkeletonList() : renderSkeletonTable();
+    }
+    return isMobileView ? (
+      renderMobileList()
+    ) : (
+      <Table
+        columns={columns}
+        dataSource={leads}
+        rowKey="id"
+        className="leads-custom-table"
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} leads`,
+          size: "default",
+          responsive: true,
+        }}
+        scroll={{ x: "max-content" }}
+        rowClassName={(record) =>
+          selectedLeadIds.includes(record.id) ? "ant-table-row-selected" : ""
+        }
+        onRow={(record) => ({
+          onClick: () => onSelect(record.id),
+          className: "custom-table-row",
+        })}
+        size={screens.sm ? "middle" : "small"}
+      />
+    );
+  };
+
   return (
     <div className="leads-table-container">
-      {isMobileView ? (
-        renderMobileList()
-      ) : (
-        <Table
-          columns={columns}
-          dataSource={leads}
-          rowKey="id"
-          className="leads-custom-table"
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} leads`,
-            size: "default",
-            responsive: true,
-          }}
-          scroll={{ x: 'max-content' }}
-          rowClassName={(record) =>
-            selectedLeadIds.includes(record.id) ? "ant-table-row-selected" : ""
-          }
-          onRow={(record) => ({
-            onClick: () => onSelect(record.id),
-            className: "custom-table-row",
-          })}
-          size={screens.sm ? "middle" : "small"}
-        />
-      )}
+      {renderContent()}
       {renderLeadDetailDrawer()}
-      
+
       <style jsx global>{`
         .leads-table-container {
           border-radius: 8px;
           overflow: hidden;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03),
+            0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
         }
-        
+
         .leads-custom-table {
           background: #fff;
           border-radius: 8px;
           border: 1px solid #e0e0e0;
         }
-        
+
         .leads-custom-table .ant-table-thead > tr > th {
           font-weight: 600;
-          padding: ${screens.sm ? '16px' : '12px 8px'};
+          padding: ${screens.sm ? "16px" : "12px 8px"};
           white-space: nowrap;
         }
-        
+
         .leads-custom-table .ant-table-tbody > tr > td {
-          padding: ${screens.sm ? '16px' : '12px 8px'};
+          padding: ${screens.sm ? "16px" : "12px 8px"};
           transition: all 0.2s;
         }
-        
+
         .custom-table-row {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        
+
         .custom-table-row:hover {
           background-color: #fafafa;
         }
-        
+
         .ant-table-row-selected {
           background-color: #e6f4ff !important;
         }
-        
+
         .leads-custom-table .ant-pagination {
           margin: 16px;
-          padding: 0;
+          padding: 14px;
           display: flex;
           flex-wrap: wrap;
-          justify-content: center;
+          justify-content: flex-end;
         }
-        
+
         @media (max-width: 768px) {
           .leads-custom-table .ant-pagination-options {
             display: none;
           }
         }
-        
+
         .leads-custom-table .ant-table-cell {
           vertical-align: middle;
         }
-        
+
         /* Mobile list styles */
         .leads-mobile-list {
           background: #fff;
@@ -589,49 +665,49 @@ const LeadsTable = ({
           border: 1px solid #e0e0e0;
           overflow: hidden;
         }
-        
+
         .leads-mobile-list .ant-list-item {
           padding: 12px 16px;
           transition: background-color 0.2s ease;
         }
-        
+
         .mobile-list-item-selected {
           background-color: #e6f4ff !important;
         }
-        
+
         .leads-mobile-list .ant-list-item:hover {
           background-color: #fafafa;
         }
-        
+
         .leads-mobile-list .ant-list-item-meta {
           align-items: center;
         }
-        
+
         /* Drawer styles */
         .lead-detail-container {
           padding: 0 4px;
         }
-        
+
         .section-title {
           font-size: 16px;
           font-weight: 600;
           margin-bottom: 12px;
           color: #262626;
         }
-        
+
         .info-item {
           display: flex;
           align-items: center;
           margin-bottom: 12px;
         }
-        
+
         .drawer-actions {
           position: sticky;
           bottom: 0;
           padding-bottom: 8px;
           background-color: white;
         }
-        
+
         /* Handle mobile pagination */
         @media (max-width: 576px) {
           .ant-pagination-item {
@@ -643,6 +719,23 @@ const LeadsTable = ({
           .ant-pagination-options {
             display: none;
           }
+        }
+
+        /* Skeleton styles */
+        .ant-skeleton {
+          width: 100%;
+        }
+
+        .ant-skeleton-element {
+          width: 100%;
+        }
+
+        .ant-list-item .ant-skeleton {
+          padding: 8px 0;
+        }
+
+        .ant-table .ant-skeleton-input {
+          min-width: 50px;
         }
       `}</style>
     </div>
@@ -657,4 +750,5 @@ LeadsTable.propTypes = {
   leads: PropTypes.array.isRequired,
   onSelect: PropTypes.func.isRequired,
   selectedLeadIds: PropTypes.array.isRequired,
+  loading: PropTypes.bool,
 };

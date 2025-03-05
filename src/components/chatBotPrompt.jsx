@@ -242,6 +242,7 @@ const SystemPromptForm = () => {
                   icon={<SyncOutlined spin={loading} />}
                   onClick={fetchCurrentPrompt}
                   disabled={loading || saving}
+
                   className="rounded-lg"
                 >
                   <span className="hidden sm:inline">Refresh</span>
@@ -250,6 +251,7 @@ const SystemPromptForm = () => {
               <Button
                 type="primary"
                 icon={<SaveOutlined />}
+                style={{ backgroundColor: '#000000', color: '#ffffff' }}
                 htmlType="submit"
                 loading={saving}
                 disabled={loading}

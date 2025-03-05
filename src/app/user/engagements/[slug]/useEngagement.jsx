@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import useAxios from "../../../lib/axios";
+import useAxios from "../../../../lib";
 
 export const useEngagement = (slug) => {
   const axios = useAxios();

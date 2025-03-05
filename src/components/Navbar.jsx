@@ -337,12 +337,12 @@ const Navbar = () => {
         maskClosable={true}
         keyboard={true}
         footer={
-          <button 
+          <div 
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md w-full transition-colors"
             style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >  
             <SignOutButton  redirectUrl="/login"/>
-          </button>
+          </div>
         }
       >
         <div onClick={handleDrawerContentClick} className="drawer-content">

@@ -317,11 +317,6 @@ const LeadsDashboard = () => {
           />
 
           <div className="relative">
-            {loading && page === 1 ? (
-              <div className="flex items-center justify-center py-8 sm:py-16 bg-white rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                <Spin indicator={antIcon} tip="Loading leads..." />
-              </div>
-            ) : (
               <div
                 ref={listRef}
                 onScroll={handleScroll}
@@ -337,10 +332,11 @@ const LeadsDashboard = () => {
                   onSelect={handleSelectLead}
                   selectedLeadIds={selectedLeads}
                   leads={filteredLeads}
+                  loading={loading}
                   isMobile={windowWidth < 768}
                 />
               </div>
-            )}
+            
 
             {loading && page > 1 && (
               <div className="flex justify-center py-4">

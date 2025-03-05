@@ -1,0 +1,41 @@
+export const dummyEmails = [
+  {
+    id: 1,
+    type: "email",
+    subject: "Project Update",
+    content: "Here's the latest update on our project progress.",
+    htmlContent: null,
+    attachments: [],
+    time: "10:30 AM",
+    sender: "me",
+    status: "sent",
+  },
+  {
+    id: 2,
+    type: "email",
+    subject: "Design Files",
+    content: "Please find the attached design files for review.",
+    htmlContent: null,
+    attachments: [
+      {
+        name: "design.pdf",
+        type: "application/pdf",
+        size: "2.4 MB",
+      },
+    ],
+    time: "11:15 AM",
+    sender: "me",
+    status: "delivered",
+  },
+  {
+    id: 3,
+    type: "email",
+    subject: "Meeting Notes",
+    content: "Here are the notes from our last meeting.",
+    htmlContent: "<h1>Meeting Notes</h1><p>Key points discussed...</p>",
+    attachments: [],
+    time: "2:00 PM",
+    sender: "me",
+    status: "read",
+  },
+]; 

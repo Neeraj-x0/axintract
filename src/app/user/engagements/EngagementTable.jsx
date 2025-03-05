@@ -25,6 +25,7 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
+import Link from "next/link";
 
 const { Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -46,11 +47,21 @@ const EngagementTable = ({
   const isMobileView = useMemo(() => !screens.md, [screens.md]);
   const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
  
-   const handleChange = (e) => {
+  // Fix for the selection handler
+  const handleChange = (e) => {
+    // This prevents event propagation to avoid interfering with row click
+    e.stopPropagation();
     onSelectAll(e.target.checked);
   };
   
-  const showEngagementDetail = (record) => {
+  // Handler for single item selection
+  const handleSelectOne = (id, e) => {
+    if (e) e.stopPropagation();
+    onSelectOne(id);
+  };
+  
+  const showEngagementDetail = (record, e) => {
+    if (e) e.stopPropagation();
     setSelectedEngagement(record);
     setDetailVisible(true);
   };
@@ -179,10 +190,14 @@ const EngagementTable = ({
   };
 
   const columns = [
-  {
+    {
       title: (
         <div className="flex justify-center items-center w-full">
-          <Checkbox checked={isAllSelected} onChange={handleChange} />
+          <Checkbox 
+            checked={isAllSelected} 
+            onChange={handleChange}
+            onClick={(e) => e.stopPropagation()} // Prevent row click event
+          />
         </div>
       ),
       dataIndex: "checkbox",
@@ -192,12 +207,9 @@ const EngagementTable = ({
       render: (_, record) => (
         <div className="flex justify-center items-center">
           <Checkbox
-            checked={selectedLeadIds?.includes(record.id)}
-            onChange={(e) => {
-              e.stopPropagation();
-              onSelectOne(record.id);
-            }}
-            onClick={(e) => e.stopPropagation()}
+            checked={selectedLeadIds?.includes(record.id || record._id)}
+            onChange={(e) => handleSelectOne(record.id || record._id, e)}
+            onClick={(e) => e.stopPropagation()} // Prevent row click event
           />
         </div>
       ),
@@ -320,21 +332,21 @@ const EngagementTable = ({
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                showEngagementDetail(record);
+                showEngagementDetail(record, e);
               }}
             />
           )}
-        <Button
-            type="text"
-          icon={<EyeOutlined />}
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log("View details", record);
-              // Navigate or handle view action
-          }}
-        >
-          View
-        </Button>
+          <Link 
+            href={`/user/engagements/${record.id || record._id}`}
+            onClick={(e) => e.stopPropagation()} // Prevent row click event
+          >
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+            >
+              View
+            </Button>
+          </Link>
         </Space>
       ),
     },
@@ -352,28 +364,34 @@ const EngagementTable = ({
         loading={loading}
         renderItem={(engagement) => (
           <List.Item 
-            className={selectedLeadIds?.includes(engagement.id) ? "mobile-list-item-selected" : ""}
+            className={selectedLeadIds?.includes(engagement.id || engagement._id) ? "mobile-list-item-selected" : ""}
             actions={[
-              <Button
-                key="view"
-                type="primary"
-                icon={<EyeOutlined />}
-                size="small"
-                onClick={() => console.log("View details", engagement)}
-                style={{
-                  backgroundColor: "#ffffff",
-                  color: "#000000",
-                  borderColor: "#cdd0cf",
-                  padding: "10px 10px",
-                }}
+              <Link 
+                key="view" 
+                href={`/user/engagements/${engagement.id || engagement._id}`}
               >
-                View
-              </Button>,
+                <Button
+                  type="primary"
+                  icon={<EyeOutlined />}
+                  size="small"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    color: "#000000",
+                    borderColor: "#cdd0cf",
+                    padding: "10px 10px",
+                  }}
+                >
+                  View
+                </Button>
+              </Link>,
               <Button
                 key="info"
                 icon={<InfoCircleOutlined />}
                 size="small"
-                onClick={() => showEngagementDetail(engagement)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  showEngagementDetail(engagement, e);
+                }}
               />
             ]}
           >
@@ -381,11 +399,8 @@ const EngagementTable = ({
               avatar={
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <Checkbox
-                    checked={selectedLeadIds?.includes(engagement.id)}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      onSelectOne(engagement.id);
-                    }}
+                    checked={selectedLeadIds?.includes(engagement.id || engagement._id)}
+                    onChange={(e) => handleSelectOne(engagement.id || engagement._id, e)}
                     onClick={(e) => e.stopPropagation()}
                     style={{ marginRight: 12 }}
                   />
@@ -441,6 +456,7 @@ const EngagementTable = ({
     if (!selectedEngagement) return null;
     
     const metrics = utils.getResponseMetrics(selectedEngagement);
+    const engagementId = selectedEngagement.id || selectedEngagement._id;
     
     return (
       <Drawer
@@ -463,7 +479,7 @@ const EngagementTable = ({
             >
               {selectedEngagement.name ? utils.getInitials(selectedEngagement.name) : null}
             </Avatar>
-                        <div className="ml-4">
+            <div className="ml-4">
               <Text strong style={{ fontSize: '18px', display: 'block' }}>
                 {selectedEngagement.name || "Untitled Engagement"}
               </Text>
@@ -487,7 +503,7 @@ const EngagementTable = ({
               <Text>Category: </Text>
               {selectedEngagement.category ? (
                 <Tag color={utils.getCategoryColor(selectedEngagement.category)}>
-                  {selectedEngagement.category.toUpperCase()}
+                  {selectedEngagement.category}
                 </Tag>
               ) : (
                 <Text type="secondary">Not assigned</Text>
@@ -507,17 +523,17 @@ const EngagementTable = ({
               <Text>{selectedEngagement.totalMessages || 0} total messages</Text>
             </div>
             
-            {utils.getResponseMetrics(selectedEngagement) && (
+            {metrics && (
               <div className="info-item">
                 <InfoCircleOutlined style={{ color: '#8c8c8c', marginRight: 8 }} />
                 <Text>Average response time: </Text>
                 <Text 
                   strong 
                   style={{ 
-                    color: utils.getResponseMetrics(selectedEngagement).color 
+                    color: metrics.color 
                   }}
                 >
-                  {utils.getResponseMetrics(selectedEngagement).value} {utils.getResponseMetrics(selectedEngagement).unit}
+                  {metrics.value} {metrics.unit}
                 </Text>
               </div>
             )}
@@ -538,24 +554,24 @@ const EngagementTable = ({
           </div>
           
           <div className="drawer-actions" style={{ marginTop: '24px' }}>
-            <Button
-              type="primary"
-              icon={<EyeOutlined />}
-              block
-              onClick={() => {
-                console.log("View full engagement", selectedEngagement);
-                // Handle navigation or view action
-                setDetailVisible(false);
-              }}
-              style={{
-                backgroundColor: "#ffffff",
-                borderColor: "#cdd0cf",
-                color: "#000000",
-                height: '40px'
-              }}
-            >
-              View Complete Details
-            </Button>
+            <Link href={`/user/engagements/${engagementId}`}>
+              <Button
+                type="primary"
+                icon={<EyeOutlined />}
+                block
+                onClick={() => {
+                  setDetailVisible(false);
+                }}
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderColor: "#cdd0cf",
+                  color: "#000000",
+                  height: '40px'
+                }}
+              >
+                View Complete Details
+              </Button>
+            </Link>
           </div>
         </div>
       </Drawer>
@@ -569,10 +585,10 @@ const EngagementTable = ({
       ) : (
       <Table
           dataSource={engagements}
-        columns={columns}
+          columns={columns}
           rowKey={(record) => record.id || record._id}
           pagination={false}
-        loading={loading}
+          loading={loading}
           scroll={{
             x: windowWidth <= 640 ? 500 : windowWidth <= 768 ? 800 : 1200,
             y: windowWidth <= 640 ? '50vh' : windowWidth <= 1024 ? '60vh' : '65vh'
@@ -588,13 +604,13 @@ const EngagementTable = ({
           onRow={(record) => ({
             onClick: () => {
               if (isMobileView) return;
-              onSelectOne(record.id);
+              handleSelectOne(record.id || record._id);
             },
             style: { cursor: 'pointer' }
           })}
-        rowClassName={(record) =>
-            selectedLeadIds?.includes(record.id) ? "selected-table-row" : ""
-        }
+          rowClassName={(record) =>
+            selectedLeadIds?.includes(record.id || record._id) ? "selected-table-row" : ""
+          }
       />
       )}
 

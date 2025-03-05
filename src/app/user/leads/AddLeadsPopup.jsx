@@ -215,7 +215,7 @@ const AddLeadsPopup = ({ isOpen, onClose, onSubmit, category, isLoading }) => {
               </Button>
             </div>
 
-            <Card bordered={false} className="upload-card">
+            <Card variant="borderless" className="upload-card">
               <Dragger {...uploadProps} style={{ padding: "20px 0" }}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined

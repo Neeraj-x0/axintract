@@ -413,7 +413,7 @@ const LeadManagementDashboard = () => {
     <Card
       title={title}
       extra={extra}
-      bordered={false}
+      variant="borderless"
       className="dashboard-card"
       style={{ height: "100%", marginBottom: isMobile ? 16 : 0 }}
       styles={{body: {padding: isMobile ? 12 : 24, height: "calc(100% - 57px)", overflow: "auto"}}}
@@ -465,7 +465,7 @@ const LeadManagementDashboard = () => {
         {/* Stats Cards */}
         <Row gutter={[{ xs: 8, sm: 16 }, { xs: 8, sm: 16 }]}>
           <Col xs={12} sm={12} lg={6}>
-            <Card bordered={false} style={{ height: "100%" }}>
+            <Card variant="borderless" style={{ height: "100%" }}>
               <Statistic
                 title="Total Leads"
                 value={1247}
@@ -740,7 +740,7 @@ const LeadManagementDashboard = () => {
                 <Row gutter={[{ xs: 8, sm: 12 }, { xs: 8, sm: 12 }]}>
                   <Col xs={12}>
                     <Card
-                      bordered={false}
+                      variant="borderless"
                       style={{ background: "#fafafa", height: "100%" }}
                       styles={{body: {padding: "12px" }}}
                     >
@@ -756,7 +756,7 @@ const LeadManagementDashboard = () => {
                 </Col>
                   <Col xs={12}>
                     <Card
-                      bordered={false}
+                      variant="borderless"
                       style={{ background: "#fafafa", height: "100%" }}
                       styles={{body: {padding: "12px" }}}
                     >
@@ -772,7 +772,7 @@ const LeadManagementDashboard = () => {
                 </Col>
                   <Col xs={12}>
                     <Card
-                      bordered={false}
+                      variant="borderless"
                       style={{ background: "#fafafa", height: "100%" }}
                       styles={{body: {padding: "12px" }}}
                     >
@@ -788,7 +788,7 @@ const LeadManagementDashboard = () => {
                 </Col>
                   <Col xs={12}>
                     <Card
-                      bordered={false}
+                      variant="borderless"
                       style={{ background: "#fafafa", height: "100%" }}
                       styles={{body: {padding: "12px" }}}
                     >

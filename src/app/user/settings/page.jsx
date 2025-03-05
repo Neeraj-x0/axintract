@@ -36,7 +36,7 @@ const { Content } = Layout;
 
 // Styled Components with improved responsiveness
 const StyledLayout = styled(Layout)`
-  background: #f8f9fa;
+  background: #ffffff;
   min-height: 100vh;
 `;
 
@@ -58,7 +58,7 @@ const StyledContent = styled(Content)`
 const StyledCard = styled(Card)`
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: none;
+  border: 1px solid #e0e0e0;
   transition: all 0.3s ease;
   
   &:hover {
@@ -66,7 +66,7 @@ const StyledCard = styled(Card)`
   }
 
   .ant-card-head {
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #e0e0e0;
     padding: 16px 24px;
     border-radius: 12px 12px 0 0;
     background: #fafafa;
@@ -82,7 +82,7 @@ const StyledCard = styled(Card)`
 `;
 
 const ProfileHeader = styled.div`
-  background: linear-gradient(135deg, #1a1a1a, #333333);
+  background: linear-gradient(135deg, #000000, #333333);
   height: 140px;
   margin: -24px -24px 0;
   position: relative;
@@ -204,7 +204,7 @@ const SettingsListItem = ({
             icon={<EditOutlined />}
             onClick={() => onEdit(type, index, item)}
             size="small"
-            className="text-blue-600"
+            className="text-gray-600"
           >
             <span className="hidden sm:inline">Edit</span>
           </Button>
@@ -215,7 +215,7 @@ const SettingsListItem = ({
             okText="Yes"
             cancelText="No"
             okButtonProps={{ className: "bg-black hover:bg-gray-800" }}
-            icon={<InfoCircleOutlined style={{ color: 'red' }} />}
+            icon={<InfoCircleOutlined style={{ color: '#ff4d4f' }} />}
           >
             <Button type="text" danger icon={<DeleteOutlined />} size="small">
               <span className="hidden sm:inline">Delete</span>
@@ -498,7 +498,7 @@ const SettingsPage = () => {
               className="max-w-2xl mx-auto px-4"
             >
               <CardHeader>
-                                 <BuildOutlined className="text-xl text-gray-700" />
+                <BuildOutlined className="text-xl text-gray-700" />
                 <Title level={4} className="mb-0 ml-2">
                   Profile Settings
                 </Title>
@@ -541,8 +541,8 @@ const SettingsPage = () => {
                     htmlType="submit"
                     icon={<SaveOutlined />}
                     loading={isLoading}
+                    style={{ backgroundColor: '#000000', color: '#ffffff' }}
                     size="large"
-                    className="bg-black hover:bg-gray-800 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                   >
                     Save Profile
                   </Button>
@@ -607,7 +607,7 @@ const SettingsPage = () => {
                 <List
                   size="large"
                   dataSource={categories}
-                  bordered={false}
+                  variant="borderless"
                   className="mt-2"
                   renderItem={(item, index) => (
                     <SettingsListItem
@@ -670,7 +670,7 @@ const SettingsPage = () => {
                 <List
                   size="large"
                   dataSource={statuses}
-                  bordered={false}
+                  variant="borderless"
                   className="mt-2"
                   renderItem={(item, index) => (
                     <SettingsListItem

@@ -88,7 +88,7 @@ function Header() {
   };
 
   return (
-    <header className="w-full bg-white shadow-sm text-neutral-900">
+    <header className="w-full bg-white text-neutral-900">
       <div className="flex justify-between items-center px-6 sm:px-10 md:px-16 lg:px-24 py-4 mx-auto my-0 relative">
         <Logo />
         
@@ -138,7 +138,7 @@ function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white z-50 shadow-md md:hidden">
+          <div className="absolute top-full left-0 right-0 bg-white z-50 md:hidden">
             <nav className="flex flex-col p-4">
               {navItems.map((item) => (
                 <div key={item.text} className="py-3 border-b border-gray-100">

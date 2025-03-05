@@ -4,6 +4,7 @@ const initialState = {
   isCollapsed: false,
   isSidebarOpen: true,
   isMobile: false,
+  activeKey: "dashboard",
 };
 
 const sidebarSlice = createSlice({
@@ -23,8 +24,11 @@ const sidebarSlice = createSlice({
         state.isSidebarOpen = false;
       }
     },
+    setActiveKey: (state, action) => {
+      state.activeKey = action.payload;
+    },
   },
 });
 
-export const { toggleCollapsed, toggleSidebarOpen, setMobile } = sidebarSlice.actions;
-export default sidebarSlice.reducer; 
+export const { toggleCollapsed, toggleSidebarOpen, setMobile, setActiveKey } = sidebarSlice.actions;
+export default sidebarSlice.reducer;

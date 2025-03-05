@@ -17,11 +17,10 @@ export default function LeadLayout({ children }) {
       <Layout style={{ background: '#ffffff' }}>
         <Content
           style={{
-            margin: '0 24px',
+          
             marginLeft: collapsed ? '80px' : '280px',
             transition: 'all 0.3s ease',
             background: '#ffffff',
-            padding: '24px',
             minHeight: 'auto'
           }}
         >
