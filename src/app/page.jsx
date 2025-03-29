@@ -13,10 +13,6 @@ import Footer from '../components/LandingPage/Footer';
 function CustomerEngagement() {
   return (
     <div className="w-full bg-white">
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
-        rel="stylesheet"
-      />
       <Header />
       <Hero />
       <DashboardPreview />

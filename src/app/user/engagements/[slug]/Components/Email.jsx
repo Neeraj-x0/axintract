@@ -4,6 +4,7 @@ import { MailOutlined, PaperClipOutlined } from "@ant-design/icons";
 import FilePreview from "./Email/FilePreview";
 import MessageInput from "./Email/MessageInput";
 import { dummyEmails } from "./Email/constants";
+
 import EmailBubble from "./Email/EmailBubble";
 
 const { Content } = Layout;
@@ -78,37 +79,154 @@ const EnhancedEmail = () => {
 
   return (
     <>
-      <Layout 
-        style={{ 
-          background: "#ffffff", 
-          overflow: "hidden", 
+      <Layout
+        style={{
+          background: "#ffffff",
+          overflow: "hidden",
           padding: 0,
-          boxShadow: "0 4px 6px rgba(0,0,0,0.05)"
+          boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
         }}
       >
         <Content
           style={{
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             position: "relative",
             height: "calc(100vh - 80px)",
             border: "1px solid rgba(0,0,0,0.06)",
             borderRadius: "8px",
-            overflow: "hidden"
+            overflow: "hidden",
           }}
         >
+          <div style={{ padding: "10px", width: "600px" }}>
+            <Card
+              style={{
+                border: "1px solid rgba(0,0,0,0.08)",
+                borderRadius: "8px",
+                boxShadow: "0 -1px 3px rgba(0,0,0,0.05)",
+              }}
+            >
+              <div style={{ marginBottom: "16px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <MailOutlined style={{ color: "#2563EB" }} />
+                  <Text strong>Email Configuration</Text>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "16px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <div>
+                    <Text>Email Service</Text>
+                    <Select
+                      value={emailService}
+                      onChange={setEmailService}
+                      style={{ width: "100%" }}
+                    >
+                      <Select.Option value="mailgun">Mailgun</Select.Option>
+                      <Select.Option value="gmail">Gmail</Select.Option>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Text>Email Format</Text>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "4px",
+                        border: "1px solid #d9d9d9",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      <Text>HTML</Text>
+                      <Switch checked={isHtmlMode} onChange={setIsHtmlMode} />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "16px" }}>
+                  <Text>Subject</Text>
+                  <Input
+                    placeholder="Enter email subject"
+                    value={formData.emailSubject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, emailSubject: e.target.value })
+                    }
+                  />
+                </div>
+
+                {isHtmlMode && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <Text>Email Title</Text>
+                    <Input
+                      placeholder="Email title"
+                      value={formData.emailTitle}
+                      onChange={(e) =>
+                        setFormData({ ...formData, emailTitle: e.target.value })
+                      }
+                    />
+                  </div>
+                )}
+
+                <div style={{ marginBottom: "16px" }}>
+                  <Text>{isHtmlMode ? "HTML Content" : "Email Content"}</Text>
+                  <TextArea
+                    placeholder={`Enter ${
+                      isHtmlMode ? "HTML" : "email"
+                    } content...`}
+                    value={isHtmlMode ? formData.customHTML : messageText}
+                    onChange={(e) => {
+                      if (isHtmlMode) {
+                        setFormData({
+                          ...formData,
+                          customHTML: e.target.value,
+                        });
+                      } else {
+                        setMessageText(e.target.value);
+                      }
+                    }}
+                    rows={4}
+                    style={{ fontFamily: isHtmlMode ? "monospace" : "inherit" }}
+                  />
+                </div>
+              </div>
+
+              <MessageInput
+                messageText={messageText}
+                fileList={fileList}
+                onMessageChange={setMessageText}
+                onSendMessage={handleSendMessage}
+                onKeyPress={handleKeyPress}
+                onFileListChange={setFileList}
+                onRemoveFile={handleRemoveFile}
+              />
+            </Card>
+          </div>
           <div
             style={{
               flex: 1,
               padding: "20px",
               overflowY: "auto",
               background: "#fafafa",
-              backgroundImage:
-                "linear-gradient(rgba(240, 245, 255, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(240, 245, 255, 0.5) 1px, transparent 1px)",
-              backgroundSize: "20px 20px",
+              backgroundImage: "url(/chatbg.png)", // Background image for messages container
+              backgroundSize: "auto",
+              backgroundPosition: "center",
               border: "1px solid rgba(0,0,0,0.04)",
               borderRadius: "6px",
-              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)"
+              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)",
             }}
             className="email-messages-container"
           >
@@ -136,7 +254,7 @@ const EnhancedEmail = () => {
                 boxShadow: "0 -2px 10px rgba(0,0,0,0.03)",
                 border: "1px solid rgba(0,0,0,0.06)",
                 borderRadius: "6px",
-                margin: "10px"
+                margin: "10px",
               }}
             >
               <div
@@ -157,92 +275,6 @@ const EnhancedEmail = () => {
               </div>
             </div>
           )}
-
-          <div style={{ padding: "10px" }}>
-            <Card
-              style={{
-                border: "1px solid rgba(0,0,0,0.08)",
-                borderRadius: "8px",
-                boxShadow: "0 -1px 3px rgba(0,0,0,0.05)",
-              }}
-            >
-              <div style={{ marginBottom: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                  <MailOutlined style={{ color: "#2563EB" }} />
-                  <Text strong>Email Configuration</Text>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
-                  <div>
-                    <Text>Email Service</Text>
-                    <Select
-                      value={emailService}
-                      onChange={setEmailService}
-                      style={{ width: "100%" }}
-                    >
-                      <Select.Option value="mailgun">Mailgun</Select.Option>
-                      <Select.Option value="gmail">Gmail</Select.Option>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Text>Email Format</Text>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px", border: "1px solid #d9d9d9", borderRadius: "4px" }}>
-                      <Text>Use HTML Format</Text>
-                      <Switch checked={isHtmlMode} onChange={setIsHtmlMode} />
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: "16px" }}>
-                  <Text>Subject</Text>
-                  <Input
-                    placeholder="Enter email subject"
-                    value={formData.emailSubject}
-                    onChange={(e) => setFormData({ ...formData, emailSubject: e.target.value })}
-                  />
-                </div>
-
-                {isHtmlMode && (
-                  <div style={{ marginBottom: "16px" }}>
-                    <Text>Email Title</Text>
-                    <Input
-                      placeholder="Email title"
-                      value={formData.emailTitle}
-                      onChange={(e) => setFormData({ ...formData, emailTitle: e.target.value })}
-                    />
-                  </div>
-                )}
-
-                <div style={{ marginBottom: "16px" }}>
-                  <Text>{isHtmlMode ? "HTML Content" : "Email Content"}</Text>
-                  <TextArea
-                    placeholder={`Enter ${isHtmlMode ? "HTML" : "email"} content...`}
-                    value={isHtmlMode ? formData.customHTML : messageText}
-                    onChange={(e) => {
-                      if (isHtmlMode) {
-                        setFormData({ ...formData, customHTML: e.target.value });
-                      } else {
-                        setMessageText(e.target.value);
-                      }
-                    }}
-                    rows={4}
-                    style={{ fontFamily: isHtmlMode ? "monospace" : "inherit" }}
-                  />
-                </div>
-              </div>
-
-              <MessageInput
-                messageText={messageText}
-                fileList={fileList}
-                onMessageChange={setMessageText}
-                onSendMessage={handleSendMessage}
-                onKeyPress={handleKeyPress}
-                onFileListChange={setFileList}
-                onRemoveFile={handleRemoveFile}
-              />
-            </Card>
-          </div>
         </Content>
       </Layout>
 
@@ -271,4 +303,4 @@ const EnhancedEmail = () => {
   );
 };
 
-export default EnhancedEmail; 
+export default EnhancedEmail;

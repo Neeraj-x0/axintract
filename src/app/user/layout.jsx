@@ -12,7 +12,7 @@ export default  function DashboardLayout({ children }) {
 
   if (!isLoaded) {
     return (
-      <div className="flex justify-center flex-col gap-4 items-center h-screen">
+      <div className="flex justify-center flex-col gap-4 overflow-hidden items-center h-screen">
         <Spin size="large" />
        
       </div>
@@ -23,9 +23,10 @@ export default  function DashboardLayout({ children }) {
     redirect("/login");
   }
   return (
-    <Layout>
+    <Layout 
+      className={`flex flex-col h-screen  bg-white font-comfortaa`}>
       <Navbar />
-      <Content className={`flex-1 overflow-auto transition-all duration-200 `}>
+      <Content className={`flex-1  pt-16 transition-all duration-200 `}>
         <div className="">{children}</div>
       </Content>
     </Layout>

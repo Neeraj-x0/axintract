@@ -10,7 +10,11 @@ const nextConfig = {
             },
             { 
             hostname: "api.axintract.com" 
+            },
+            {
+            hostname:"localhost"
             }
+
         ]
 
     }

@@ -117,10 +117,7 @@ function Header() {
         <div className="hidden md:flex gap-2 lg:gap-4 items-center">
           <SignedIn>
             <Button variant="outline" className="text-sm lg:text-base">
-              <Link href="/user/home">Dashboard</Link>
-            </Button>
-            <Button variant="outline" className="bg-red-500 text-white text-sm lg:text-base">
-              <SignOutButton />
+              <Link href="/user/dashboard">Dashboard</Link>
             </Button>
             <UserButton />
           </SignedIn>
@@ -128,9 +125,9 @@ function Header() {
             <Button variant="outline" className="text-sm lg:text-base">
               <SignInButton
                 mode="modal"
-                signUpFallbackRedirectUrl="/user/home"
-                forceRedirectUrl="/user/home"
-                fallbackRedirectUrl="/user/home"
+                signUpFallbackRedirectUrl="/user/dashboard"
+                forceRedirectUrl="/user/dashboard"
+                fallbackRedirectUrl="/user/dashboard"
               />
             </Button>
           </SignedOut>
@@ -174,7 +171,7 @@ function Header() {
             <div className="flex flex-col gap-3 p-4 border-t border-gray-100">
               <SignedIn>
                 <Button variant="outline" className="w-full text-center">
-                  <Link href="/user/home">Dashboard</Link>
+                  <Link href="/user/dashboard">Dashboard</Link>
                 </Button>
                 <Button variant="outline" className="w-full bg-red-500 text-white text-center">
                   <SignOutButton />
@@ -187,9 +184,9 @@ function Header() {
                 <Button variant="outline" className="w-full text-center">
                   <SignInButton
                     mode="modal"
-                    signUpFallbackRedirectUrl="/user/home"
-                    forceRedirectUrl="/user/home"
-                    fallbackRedirectUrl="/user/home"
+                    signUpFallbackRedirectUrl="/user/dashboard"
+                    forceRedirectUrl="/user/dashboard"
+                    fallbackRedirectUrl="/user/dashboard"
                   />
                 </Button>
               </SignedOut>

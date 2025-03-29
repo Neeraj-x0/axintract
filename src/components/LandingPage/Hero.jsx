@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './Button';
+import Link from 'next/link';
 function Hero() {
   return (
     <section className="px-0 py-10 mx-auto my-0 max-w-[921px]">
@@ -12,7 +13,9 @@ function Hero() {
           and support customers via email, SMS, push notifications, website
           banners, live chat, and more.
         </p>
-        <Button variant="solid">Get Started for free →</Button>
+        <Button variant="solid">
+        <Link href="/sign-up">Get Started for free →</Link>
+        </Button>
       </div>
     </section>
   );

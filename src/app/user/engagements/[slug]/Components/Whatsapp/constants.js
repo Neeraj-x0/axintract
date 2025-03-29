@@ -17,7 +17,7 @@ export const dummyMessages = [
     id: 5,
     type: "image",
     imageUrl:
-      "https://image-0.uhdpaper.com/wallpaper/sports-car-futuristic-mountain-sunset-scenery-digital-art-4k-wallpaper-uhdpaper.com-537@0@i.jpg",
+      "https://res.cloudinary.com/dguddaxjl/image/upload/v1741539065/media-uploads/1741539065160-p42aj3dd6ho.png",
     caption: "Latest design mockup",
     time: "10:36 AM",
     sender: "me",
@@ -43,7 +43,57 @@ export const dummyMessages = [
     id: 11,
     type: "image",
     imageUrl:
-      "https://image-0.uhdpaper.com/wallpaper/sports-car-futuristic-mountain-sunset-scenery-digital-art-4k-wallpaper-uhdpaper.com-537@0@i.jpg",
+      "https://res.cloudinary.com/dguddaxjl/image/upload/v1741539065/media-uploads/1741539065160-p42aj3dd6ho.png",
+    caption: "Project timeline",
+    time: "10:52 AM",
+    sender: "me",
+    status: "sent",
+  },
+  {
+    id: 12,
+    type: "image",
+    imageUrl:
+      "https://res.cloudinary.com/dguddaxjl/image/upload/v1741539065/media-uploads/1741539065160-p42aj3dd6ho.png",
+    caption: "Project timeline",
+    time: "10:52 AM",
+    sender: "me",
+    status: "sent",
+  },
+  {
+    id: 13,
+    type: "image",
+    imageUrl:
+      "https://res.cloudinary.com/dguddaxjl/image/upload/v1741539065/media-uploads/1741539065160-p42aj3dd6ho.png",
+    caption: "Project timeline",
+    time: "10:52 AM",
+    sender: "me",
+    status: "sent",
+  },
+  {
+    id: 14,
+    type: "image",
+    imageUrl:
+      "https://res.cloudinary.com/dguddaxjl/image/upload/v1741539065/media-uploads/1741539065160-p42aj3dd6ho.png",
+    caption: "Project timeline",
+    time: "10:52 AM",
+    sender: "me",
+    status: "sent",
+  },
+  {
+    id: 15,
+    type: "image",
+    imageUrl:
+      "https://res.cloudinary.com/dguddaxjl/image/upload/v1741539065/media-uploads/1741539065160-p42aj3dd6ho.png",
+    caption: "Project timeline",
+    time: "10:52 AM",
+    sender: "me",
+    status: "sent",
+  },
+  {
+    id: 16,
+    type: "image",
+    imageUrl:
+      "https://res.cloudinary.com/dguddaxjl/image/upload/v1741539065/media-uploads/1741539065160-p42aj3dd6ho.png",
     caption: "Project timeline",
     time: "10:52 AM",
     sender: "me",

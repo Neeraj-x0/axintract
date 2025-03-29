@@ -1,4 +1,6 @@
-export const API_URL = "https://api.axintract.com";
+export const API_URL = "http://localhost:8081";
+
+
 
 export const parseBody = (obj) => {
   if (obj === null || obj === undefined) return undefined;

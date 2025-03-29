@@ -17,7 +17,11 @@
 body {
   color: rgb(var(--foreground-rgb));
   background-color: white;
-  font-family: "Inter", sans-serif;
+  font-family: "Poppins", sans-serif;
+}
+
+.font-poppins {
+  font-family: "Poppins", sans-serif;
 }
 
 @layer utilities {
@@ -27,28 +31,29 @@ body {
 }
 
 
-  .engagement-controls .ant-select-selector,
-  .engagement-controls .ant-input {
-    border-radius: 6px;
-  }
+.engagement-controls .ant-select-selector,
+.engagement-controls .ant-input {
+  border-radius: 6px;
+}
 
-  .engagement-controls .ant-btn {
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .engagement-controls .ant-badge-count {
-    border-radius: 10px;
-    box-shadow: none;
-    padding: 0 8px;
-    height: 22px;
-    line-height: 22px;
-    font-weight: normal;
-  }
+.engagement-controls .ant-btn {
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
 
-  @media (max-width: 767px) {
-    .engagement-controls .ant-space {
-      margin-bottom: 16px;
-    }
+.engagement-controls .ant-badge-count {
+  border-radius: 10px;
+  box-shadow: none;
+  padding: 0 8px;
+  height: 22px;
+  line-height: 22px;
+  font-weight: normal;
+}
+
+@media (max-width: 767px) {
+  .engagement-controls .ant-space {
+    margin-bottom: 16px;
   }
+}
+

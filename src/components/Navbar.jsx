@@ -52,7 +52,7 @@ const Navbar = () => {
     {
       key: "home",
       icon: <AiOutlineDashboard />,
-      label: <Link href="/user/home">Dashboard</Link>,
+      label: <Link href="/user/dashboard">Dashboard</Link>,
     },
     {
       key: "leads",
@@ -174,7 +174,7 @@ const Navbar = () => {
         setNavigating(true);
 
         // Navigate to the new route
-        const path = item.key === "home" ? "/user/home" : `/user/${item.key}`;
+        const path = item.key === "home" ? "/user/dashboard" : `/user/${item.key}`;
         router.push(path);
 
         // Reset navigating state and close drawer after navigation
@@ -195,7 +195,7 @@ const Navbar = () => {
         ref={headerRef}
         className="navbar-header"
         style={{
-          position: "sticky",
+          position: "fixed",
           top: 0,
           zIndex: 1000,
           width: "100%",
@@ -212,7 +212,7 @@ const Navbar = () => {
       >
         {/* Logo and Company Name with responsive handling */}
         <Link
-          href="/user/home"
+          href="/user/dashboard"
           className="logo-link"
           style={{
             display: "flex",

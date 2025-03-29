@@ -1,161 +1,163 @@
-import React from "react";
-import { Button, Input, Upload, Dropdown, Tooltip } from "antd";
+import React, { useState } from "react";
+import {
+  Button,
+  Input,
+  Upload,
+  Dropdown,
+  Tooltip,
+  message,
+  Space,
+  Typography,
+} from "antd";
 import {
   SendOutlined,
   PaperClipOutlined,
-  AudioOutlined,
-  FileOutlined,
-  UploadOutlined,
+  ClockCircleOutlined,
+  FileImageOutlined,
+  PictureOutlined,
 } from "@ant-design/icons";
 
-const { TextArea } = Input;
+const { Text } = Typography;
+
+const MESSAGE_SCHEDULE_OPTIONS = [
+  {
+    label: "30 Minutes",
+    duration: 30,
+    unit: "minutes",
+  },
+  {
+    label: "1 Hour",
+    duration: 1,
+    unit: "hour",
+  },
+  {
+    label: "Tomorrow",
+    duration: 1,
+    unit: "day",
+    time: { hour: 9, minute: 0 },
+  },
+];
 
 const MessageInput = ({
-  messageText,
-  captionText,
-  fileList,
+  onSend,
+  style,
+  messageText = "",
+  captionText = "",
+  fileList = [],
   onMessageChange,
   onCaptionChange,
   onSendMessage,
   onKeyPress,
   onFileListChange,
   onRemoveFile,
-  onAttachClick,
+  showModal,
 }) => {
-  const attachmentOptions = [
-    {
-      key: "generatePoster",
-      label: "Generate Poster",
-      icon: <FileOutlined />,
-      onClick: onAttachClick,
-    },
-    {
-      key: "uploadFile",
-      label: "Upload Files",
-      icon: <UploadOutlined />,
-      onClick: () => document.getElementById("file-upload").click(),
-    },
-  ];
+  const scheduleMenu = (
+    <div className="schedule-dropdown-menu">
+      {MESSAGE_SCHEDULE_OPTIONS.map((option) => (
+        <div
+          key={option.label}
+          className="schedule-option"
+          onClick={() => onSend(messageText, option)}
+        >
+          <Text>{option.label}</Text>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div
       style={{
-        padding: "12px 16px",
-        backgroundColor: "#ffffff", // Pure white background
+        borderTop: "1px solid #e8e8e8",
+        padding: "10px 15px",
+        background: "#fff",
         display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        border: "1px solid rgba(0,0,0,0.08)", // Subtle border
-        borderRadius: "12px", // Soft rounded corners
-        margin: "10px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.05)", // Gentle elevation
-        transition: "all 0.3s ease",
+        flexDirection: "column",
+        gap: "10px",
+        ...style,
       }}
     >
-      <Dropdown
-        menu={{ items: attachmentOptions }}
-        placement="topRight"
-        trigger={["click"]}
-        arrow
-      >
-        <Tooltip title="Attach Files">
-          <Button
-            type="text"
-            shape="circle"
-            icon={<PaperClipOutlined style={{ fontSize: "20px", color: "#2D55FF" }} />}
-            style={{
-              color: "#2D55FF",
-              border: "1px solid rgba(45, 85, 255, 0.2)",
-              backgroundColor: "rgba(45, 85, 255, 0.05)",
-              boxShadow: "0 2px 5px rgba(45, 85, 255, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s ease",
-            }}
-            size="large"
+      {fileList.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <Upload
+            fileList={fileList}
+            onRemove={onRemoveFile}
+            listType="picture"
+            maxCount={5}
           />
-        </Tooltip>
-      </Dropdown>
-
-      <Upload
-        id="file-upload"
-        beforeUpload={() => false}
-        showUploadList={false}
-        multiple
-        fileList={fileList}
-        onChange={({ fileList: newFileList }) => {
-          onFileListChange([...fileList, ...newFileList]);
-        }}
-      >
-        <input type="file" style={{ display: "none" }} />
-      </Upload>
-
-      {fileList.length > 0 ? (
-        <TextArea
-          value={captionText}
-          onChange={(e) => onCaptionChange(e.target.value)}
-          onKeyPress={onKeyPress}
-          placeholder="Add a caption..."
-          autoSize={{ minRows: 1, maxRows: 4 }}
-          style={{
-            flex: 1,
-            backgroundColor: "#f9fafb", // Subtle background variation
-            borderRadius: "18px",
-            border: "1px solid rgba(0,0,0,0.1)",
-            color: "#333",
-            resize: "none",
-            padding: "11px 16px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
-            fontSize: "15px",
-            transition: "all 0.3s ease",
-          }}
-        />
-      ) : (
-        <TextArea
-          value={messageText}
-          onChange={(e) => onMessageChange(e.target.value)}
-          onKeyPress={onKeyPress}
-          placeholder="Type a message"
-          autoSize={{ minRows: 1, maxRows: 4 }}
-          style={{
-            flex: 1,
-            backgroundColor: "#f9fafb", // Subtle background variation
-            borderRadius: "18px",
-            border: "1px solid rgba(0,0,0,0.1)",
-            color: "#333",
-            resize: "none",
-            padding: "11px 16px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
-            fontSize: "15px",
-            transition: "all 0.3s ease",
-          }}
-        />
+        </div>
       )}
 
-      <Button
-        type="primary"
-        shape="circle"
-        icon={
-          messageText || fileList.length > 0 ? (
-            <SendOutlined style={{ color: "white" }} />
-          ) : (
-            <AudioOutlined style={{ color: "white" }} />
-          )
-        }
-        onClick={onSendMessage}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#2D55FF", // Consistent accent color
-          border: "1px solid rgba(45, 85, 255, 0.3)",
-          boxShadow: "0 4px 12px rgba(45, 85, 255, 0.2)",
-          transition: "all 0.3s ease",
-          transform: "translateY(-1px)", // Subtle lift effect
-        }}
-        size="large"
-      />
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Input
+          placeholder={fileList.length > 0 ? "Add caption" : "Type a message"}
+          value={messageText}
+          onChange={(e) => onMessageChange?.(e.target.value)}
+          onKeyDown={onKeyPress}
+          style={{ flex: 1 }}
+          suffix={
+            <Space>
+              <Upload
+                showUploadList={false}
+                beforeUpload={(file) => {
+                  if (onFileListChange) {
+                    onFileListChange([file]);
+                  }
+                  return false;
+                }}
+              >
+                <Tooltip title="Attach file">
+                  <Button
+                    type="text"
+                    icon={<PaperClipOutlined />}
+                    style={{ border: "none" }}
+                  />
+                </Tooltip>
+              </Upload>
+
+              <Tooltip title="Create poster">
+                <Button
+                  type="text"
+                  onClick={showModal}
+                  icon={<PictureOutlined />}
+                  style={{ border: "none" }}
+                />
+              </Tooltip>
+
+              <Dropdown
+                menu={{
+                  items: MESSAGE_SCHEDULE_OPTIONS.map((option, index) => ({
+                    key: index,
+                    label: option.label,
+                    onClick: () => onSend(messageText, option),
+                  })),
+                }}
+                overlay={scheduleMenu}
+                trigger={["click"]}
+              >
+                <Tooltip title="Schedule message">
+                  <Button
+                    type="text"
+                    icon={<ClockCircleOutlined />}
+                    style={{ border: "none" }}
+                  />
+                </Tooltip>
+              </Dropdown>
+            </Space>
+          }
+        />
+
+        <Button
+          type="primary"
+          icon={<SendOutlined />}
+          onClick={() => onSendMessage?.(messageText)}
+          disabled={!messageText.trim() && fileList.length === 0}
+          style={{ marginLeft: 8 }}
+        >
+          Send
+        </Button>
+      </div>
     </div>
   );
 };

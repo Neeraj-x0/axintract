@@ -1,352 +1,650 @@
-import React, { useState, useMemo } from "react";
-import { 
-  Form, 
-  Input, 
-  Button, 
-  Upload, 
-  Space, 
-  Typography, 
-  Card, 
-  message, 
-  Alert,
+import React, { useState } from "react";
+import {
   Modal,
-  Progress,
+  Form,
+  Input,
+  Upload,
+  Button,
+  Typography,
   Row,
   Col,
-  theme
+  message,
+  Space,
+  Spin,
+  Divider,
+  Tooltip,
+  Progress,
 } from "antd";
-import { 
-  SendOutlined, 
+import {
   PictureOutlined,
-  CheckCircleFilled,
-  EditOutlined,
-  PlusOutlined
+  UploadOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  InfoCircleOutlined,
+  DownloadOutlined,
+  RedoOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
+import useAxios from "@/lib";
+import styled from "styled-components";
 
 const { TextArea } = Input;
 const { Title, Text, Paragraph } = Typography;
 
-const PosterGenerator = ({ onGenerate }) => {
-  const { token } = theme.useToken();
+// Styled components for black and white theme
+const StyledModal = styled(Modal)`
+  .ant-modal-content {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .ant-modal-header {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 20px 24px;
+  }
+
+  .ant-modal-title {
+    color: #000;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .ant-modal-body {
+    padding: 24px;
+  }
+
+  .ant-form-item-label > label {
+    color: #000;
+    font-weight: 500;
+  }
+
+  .ant-btn-primary {
+    background-color: #000;
+    border-color: #000;
+    &:hover,
+    &:focus {
+      background-color: #333;
+      border-color: #333;
+    }
+  }
+
+  .ant-btn-default {
+    border-color: #000;
+    color: #000;
+    &:hover,
+    &:focus {
+      border-color: #333;
+      color: #333;
+    }
+  }
+`;
+
+const PreviewContainer = styled.div`
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  min-height: 400px;
+`;
+
+const ImagePreview = styled.img`
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+`;
+
+const UploadCard = styled(Upload)`
+  .ant-upload.ant-upload-select-picture-card {
+    border: 2px dashed #d9d9d9;
+    border-radius: 8px;
+    background-color: #fafafa;
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: #000;
+    }
+  }
+`;
+
+const PosterModal = ({ visible, onCancel, onConfirm, username = "User" }) => {
+  const axios = useAxios();
+  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  
-  const [state, setState] = useState({
-    title: "Celebrate the Festival of Lights",
-    note: "Wishing you prosperity and positivity!",
-    iconFile: null,
-    backgroundFile: null,
-    iconFileList: [],
-    backgroundFileList: [],
-    isGenerating: false,
-    generationProgress: 0,
-    error: null,
-    previewUrl: null,
-    previewVisible: false,
-    previewImage: '',
-    previewTitle: '',
-  });
+  const [iconFile, setIconFile] = useState(null);
+  const [backgroundFile, setBackgroundFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [generatedPosterBlob, setGeneratedPosterBlob] = useState(null);
 
-  const deviceType = useMemo(() => {
-    const checkDeviceType = () => {
-      const width = window.innerWidth;
-      return width <= 768 ? 'mobile' : width <= 992 ? 'tablet' : 'desktop';
-    };
+  async function generatePoster() {
+    try {
+      setLoading(true);
+      const values = await form.validateFields();
 
-    return checkDeviceType();
-  }, [window.innerWidth]);
+      // Validate required inputs
+      if (!iconFile) {
+        throw new Error("Icon image is required");
+      }
 
-  const updateState = (newState) => {
-    setState(prev => ({ ...prev, ...newState }));
-  };
+      // Create FormData object for multipart/form-data request
+      const formData = new FormData();
+      formData.append("icon", iconFile);
 
-  const handleGeneratePoster = async (values) => {
-    const { iconFile } = state;
-    
-    if (!iconFile) {
-      updateState({ error: "Please upload an icon image" });
+      if (backgroundFile) {
+        formData.append("background", backgroundFile);
+      }
+
+      formData.append("title", values.title);
+      formData.append("note", values.note || "");
+
+      // Current date for logging or tracking purposes
+      const currentDate = new Date().toISOString();
+      formData.append("generatedAt", currentDate);
+
+      // Include username if available
+      formData.append("name", username || "User");
+
+      // Make the API request
+      const response = await axios.post("/api/generate", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        responseType: "blob",
+      });
+
+      // Store blob for later download
+      setGeneratedPosterBlob(response.data);
+
+      // Create preview URL
+      const imageUrl = URL.createObjectURL(response.data);
+      setPreviewImage(imageUrl);
+      setShowPreview(true);
+      setLoading(false);
+
+      message.success("Preview generated successfully!");
+      return response.data;
+    } catch (error) {
+      setLoading(false);
+      console.error("Error generating poster:", error);
+
+      // Show more user-friendly error message
+      message.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to generate poster. Please try again."
+      );
+
+      // Enhance error with additional context
+      const enhancedError = new Error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to generate poster"
+      );
+      enhancedError.original = error;
+      enhancedError.status = error.response?.status;
+
+      throw enhancedError;
+    }
+  }
+
+  /**
+   * Downloads the generated poster
+   */
+  function downloadPoster() {
+    if (!generatedPosterBlob) {
+      message.error("No poster available to download");
       return;
     }
 
-    updateState({ 
-      isGenerating: true, 
-      error: null, 
-      generationProgress: 5 
-    });
+    const url = URL.createObjectURL(generatedPosterBlob);
+    const link = document.createElement("a");
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+    // Generate filename from title or use default
+    const title = form.getFieldValue("title");
+    const cleanTitle = title
+      ? title.replace(/[^a-z0-9]/gi, "_").toLowerCase()
+      : "poster";
+    const filename = `${cleanTitle}_${new Date().getTime()}.png`;
 
-      const previewUrl = URL.createObjectURL(iconFile);
-      
-      updateState({ previewUrl });
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
-      if (onGenerate && typeof onGenerate === 'function') {
-        const posterData = {
-          imageUrl: previewUrl,
-          title: values.title || state.title,
-          note: values.note || state.note,
-          timestamp: new Date().toISOString()
-        };
-        
-        onGenerate(posterData);
-        message.success({
-          content: "Poster generated successfully!",
-          icon: <CheckCircleFilled style={{ color: token.colorSuccess }} />
-        });
+    message.success("Poster downloaded successfully!");
+  }
+
+  const handleIconChange = (info) => {
+    if (info.file.status === "error") {
+      message.error(`${info.file.name} file upload failed.`);
+      return;
+    }
+
+    // Reset preview if the user changes the icon
+    if (showPreview) {
+      setShowPreview(false);
+      setPreviewImage(null);
+      setGeneratedPosterBlob(null);
+    }
+
+    if (info.fileList.length > 0) {
+      const file = info.fileList[info.fileList.length - 1];
+
+      // Validate file size (max 5MB)
+      if (file.originFileObj && file.originFileObj.size > 5 * 1024 * 1024) {
+        message.warning("Image must be smaller than 5MB");
+        return;
       }
-    } catch (err) {
-      console.error("Error generating poster:", err);
-      updateState({ error: "Failed to generate poster. Please try again." });
-    } finally {
-      updateState({ 
-        isGenerating: false, 
-        generationProgress: 0 
-      });
+
+      setIconFile(file.originFileObj);
+      message.success(`${file.name} uploaded successfully`);
+    } else {
+      setIconFile(null);
     }
   };
 
-  const handleFileUpload = (type, { fileList }) => {
-    updateState({
-      [`${type}FileList`]: fileList,
-      [`${type}File`]: fileList.length > 0 ? fileList[0].originFileObj : null
+  const handleBackgroundChange = (info) => {
+    if (info.file.status === "error") {
+      message.error(`${info.file.name} file upload failed.`);
+      return;
+    }
+
+    // Reset preview if the user changes the background
+    if (showPreview) {
+      setShowPreview(false);
+      setPreviewImage(null);
+      setGeneratedPosterBlob(null);
+    }
+
+    if (info.fileList.length > 0) {
+      const file = info.fileList[info.fileList.length - 1];
+
+      // Validate file size (max 10MB)
+      if (file.originFileObj && file.originFileObj.size > 10 * 1024 * 1024) {
+        message.warning("Background image must be smaller than 10MB");
+        return;
+      }
+
+      setBackgroundFile(file.originFileObj);
+      message.success(`${file.name} uploaded successfully`);
+    } else {
+      setBackgroundFile(null);
+    }
+  };
+
+  const handleConfirm = () => {
+
+    if (!previewImage) {
+      message.error("Please generate a preview first");
+      return;
+    }
+
+    const values = form.getFieldsValue();
+
+    // Call the onConfirm callback with all the necessary data
+    onConfirm({
+      title: values.title,
+      note: values.note,
+      iconFile,
+      backgroundFile,
+      previewImage,
+      posterBlob: generatedPosterBlob,
+      
+    });
+
+    // Reset form and state
+    resetState();
+    onCancel();
+
+    message.success("Poster created successfully!");
+  };
+
+  const resetState = () => {
+    form.resetFields();
+    setIconFile(null);
+    setBackgroundFile(null);
+    setPreviewImage(null);
+    setShowPreview(false);
+    setGeneratedPosterBlob(null);
+  };
+
+  const handleCancel = () => {
+    Modal.confirm({
+      title: "Discard changes?",
+      content: "You have unsaved changes. Are you sure you want to cancel?",
+      okText: "Yes, discard",
+      cancelText: "No, continue editing",
+      okButtonProps: { style: { background: "#000", borderColor: "#000" } },
+      onOk: () => {
+        resetState();
+        onCancel();
+      },
     });
   };
 
-  const uploadProps = {
-    beforeUpload: () => false,
-    accept: "image/*",
-    listType: "picture-card",
+  // Get a readable file name for display
+  const getDisplayFileName = (file) => {
+    if (!file) return "";
+
+    const name = file.name || "";
+    if (name.length <= 20) return name;
+
+    const extension = name.split(".").pop();
+    return `${name.substring(0, 15)}...${extension}`;
   };
 
   return (
-    <Card 
-      bordered={false}
-      style={{ 
-        background: token.colorBgContainer, 
-        border: `1px solid ${token.colorBorderSecondary}`,
-        borderRadius: token.borderRadiusLG,
-        boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-        overflow: "hidden"
-      }}
-      bodyStyle={{ 
-        padding: deviceType === 'mobile' ? "16px" : "24px",
-      }}
+    <StyledModal
+      title={
+        <Space>
+          <span>Create Poster</span>
+          <Tooltip title="Create a custom poster with your own images and text">
+            <InfoCircleOutlined style={{ fontSize: "16px", color: "#999" }} />
+          </Tooltip>
+        </Space>
+      }
+      open={visible}
+      onCancel={handleCancel}
+      width={1000}
+      footer={null}
+      destroyOnClose
+      centered
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{ title: state.title, note: state.note }}
-        onFinish={handleGeneratePoster}
-        requiredMark={false}
-      >
-        <Row gutter={[16, 16]}>
-          <Col xs={24} md={state.previewUrl ? 12 : 24}>
-            <div style={{ marginBottom: deviceType === 'mobile' ? "12px" : "16px" }}>
-              <Title level={deviceType === 'mobile' ? 4 : 3} style={{ marginBottom: "8px", color: token.colorText }}>
-                Create Your Poster
-              </Title>
-              <Paragraph type="secondary" style={{ marginBottom: "16px" }}>
-                Upload an image and customize your poster.
-              </Paragraph>
-            </div>
-            
-            {state.error && (
-              <Alert
-                message={state.error}
-                type="error"
-                showIcon
-                style={{ marginBottom: "16px", borderRadius: token.borderRadius }}
-              />
-            )}
-
+      <Row gutter={24}>
+        <Col xs={24} md={showPreview ? 12 : 24}>
+          <Form
+            form={form}
+            layout="vertical"
+            initialValues={{ title: `${username}'s Awesome Poster`, note: "" }}
+            requiredMark="optional"
+          >
             <Form.Item
-              label={<Text strong>Poster Title</Text>}
               name="title"
-              initialValue={state.title}
-              rules={[{ required: true, message: 'Please enter a title' }]}
+              label="Title"
+              rules={[{ required: true, message: "Please enter a title" }]}
+              tooltip="This will be the main heading of your poster"
             >
               <Input
-                placeholder="Enter a captivating title"
-                onChange={(e) => updateState({ title: e.target.value.substring(0, 75) })}
+                placeholder={`${username}'s Awesome Poster`}
                 maxLength={75}
-                style={{ borderRadius: token.borderRadius }}
-                suffix={
-                  <Text type="secondary" style={{ fontSize: "12px" }}>
-                    {state.title.length}/75
-                  </Text>
-                }
+                showCount
+                size="large"
               />
             </Form.Item>
 
             <Form.Item
-              label={<Text strong>Message</Text>}
               name="note"
-              initialValue={state.note}
+              label="Note"
+              rules={[{ required: true, message: "Please enter a note" }]}
+              tooltip="Add a personal message or description for your poster"
             >
               <TextArea
-                placeholder="Add a personalised message"
-                onChange={(e) => updateState({ note: e.target.value.substring(0, 200) })}
-                autoSize={{ minRows: 2, maxRows: 4 }}
+                placeholder="Enter your message here..."
+                autoSize={{ minRows: 3, maxRows: 5 }}
                 maxLength={200}
-                style={{ borderRadius: token.borderRadius }}
                 showCount
+                size="large"
               />
             </Form.Item>
 
-            <Form.Item
-              label={<Text strong>Main Icon</Text>}
-              required
-              tooltip="This will be the main focus of your poster"
-            >
-              <Upload
-                {...uploadProps}
-                fileList={state.iconFileList}
-                onChange={(info) => handleFileUpload('icon', info)}
-              >
-                {state.iconFileList.length >= 1 ? null : (
-                  <div style={{ 
-                    padding: "12px", 
-                    display: "flex", 
-                    flexDirection: "column", 
-                    alignItems: "center", 
-                    justifyContent: "center",
-                    color: token.colorTextSecondary
-                  }}>
-                    <PictureOutlined style={{ fontSize: "24px", marginBottom: "8px" }} />
-                    <div>Upload Icon</div>
-                  </div>
-                )}
-              </Upload>
-            </Form.Item>
-
-            <Form.Item style={{ marginTop: "16px" }}>
-              <Space size={12} style={{ width: "100%", justifyContent: deviceType === 'mobile' ? "center" : "flex-start" }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<SendOutlined />}
-                  loading={state.isGenerating}
-                  disabled={!state.iconFile || state.isGenerating}
-                  style={{ 
-                    borderRadius: token.borderRadius,
-                    minWidth: "120px",
-                  }}
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label={
+                    <Space>
+                      <span>Icon Image</span>
+                      <Tooltip title="This will be the main focus of your poster (Required)">
+                        <InfoCircleOutlined style={{ color: "#999" }} />
+                      </Tooltip>
+                    </Space>
+                  }
+                  required
                 >
-                  {state.isGenerating ? "Generating..." : "Generate Poster"}
-                </Button>
-                <Button
-                  onClick={() => {
-                    form.resetFields();
-                    updateState({
-                      iconFileList: [],
-                      backgroundFileList: [],
-                      iconFile: null,
-                      backgroundFile: null,
-                      previewUrl: null,
-                      error: null
-                    });
-                  }}
-                  style={{ borderRadius: token.borderRadius }}
-                  disabled={state.isGenerating}
-                >
-                  Reset
-                </Button>
-              </Space>
-            </Form.Item>
-            
-            {state.isGenerating && (
-              <div style={{ marginTop: "16px" }}>
-                <Progress 
-                  percent={state.generationProgress} 
-                  status="active" 
-                  strokeColor={{
-                    from: token.colorPrimaryActive,
-                    to: token.colorPrimary,
-                  }} 
-                  style={{ borderRadius: token.borderRadius }}
-                />
-                <Text type="secondary" style={{ display: "block", textAlign: "center", marginTop: "8px" }}>
-                  Processing and generating your poster...
-                </Text>
-              </div>
-            )}
-          </Col>
-          
-          {state.previewUrl && (
-            <Col xs={24} md={12}>
-              <Card 
-                bordered 
-                style={{ 
-                  borderRadius: token.borderRadiusLG,
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  border: `1px dashed ${token.colorPrimary}`,
-                  backgroundColor: token.colorBgContainerDisabled,
-                  position: "relative"
-                }}
-                bodyStyle={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "16px",
-                  flex: 1
-                }}
-              >
-                <Text 
-                  type="secondary" 
-                  style={{ 
-                    position: "absolute", 
-                    top: "10px", 
-                    left: "12px", 
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    padding: "4px 8px",
-                    background: "rgba(0,0,0,0.05)",
-                    borderRadius: "4px"
-                  }}
-                >
-                  Preview
-                </Text>
-                
-                <div style={{ textAlign: "center", width: "100%", maxWidth: "100%" }}>
-                  <img
-                    src={state.previewUrl}
-                    alt="Poster Preview"
-                    style={{
-                      maxWidth: "100%",
-                      height: "auto",
-                      borderRadius: token.borderRadiusLG,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      marginBottom: "16px"
-                    }}
-                  />
-                  
-                  <div style={{ marginTop: "16px", textAlign: "center" }}>
-                    <Title level={4} style={{ margin: "0 0 4px 0" }}>
-                      {state.title}
-                    </Title>
-                    {state.note && (
-                      <Paragraph 
-                        style={{ 
-                          margin: 0, 
-                          color: token.colorTextSecondary,
-                          fontSize: "14px"
-                        }}
-                      >
-                        {state.note}
-                      </Paragraph>
+                  <UploadCard
+                    listType="picture-card"
+                    beforeUpload={() => false}
+                    onChange={handleIconChange}
+                    maxCount={1}
+                    accept="image/*"
+                  >
+                    {!iconFile ? (
+                      <div>
+                        <PictureOutlined style={{ fontSize: "24px" }} />
+                        <div style={{ marginTop: 8 }}>Upload Icon</div>
+                        <div style={{ fontSize: "12px", color: "#999" }}>
+                          Max: 5MB
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ position: "relative", width: "100%" }}>
+                        <img
+                          src={URL.createObjectURL(iconFile)}
+                          alt="Icon preview"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            width: "100%",
+                            background: "rgba(0,0,0,0.65)",
+                            padding: "4px",
+                            color: "white",
+                            fontSize: "11px",
+                            textOverflow: "ellipsis",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {getDisplayFileName(iconFile)}
+                        </div>
+                      </div>
                     )}
-                  </div>
+                  </UploadCard>
+                  {iconFile && (
+                    <Text
+                      type="secondary"
+                      style={{ display: "block", marginTop: "4px" }}
+                    >
+                      {Math.round(iconFile.size / 1024)} KB
+                    </Text>
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={
+                    <Space>
+                      <span>Background Image</span>
+                      <Tooltip title="Custom background for your poster (Optional)">
+                        <InfoCircleOutlined style={{ color: "#999" }} />
+                      </Tooltip>
+                    </Space>
+                  }
+                >
+                  <UploadCard
+                    listType="picture-card"
+                    beforeUpload={() => false}
+                    onChange={handleBackgroundChange}
+                    maxCount={1}
+                    accept="image/*"
+                  >
+                    {!backgroundFile ? (
+                      <div>
+                        <UploadOutlined style={{ fontSize: "24px" }} />
+                        <div style={{ marginTop: 8 }}>Upload Background</div>
+                        <div style={{ fontSize: "12px", color: "#999" }}>
+                          Max: 10MB
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ position: "relative", width: "100%" }}>
+                        <img
+                          src={URL.createObjectURL(backgroundFile)}
+                          alt="Background preview"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            width: "100%",
+                            background: "rgba(0,0,0,0.65)",
+                            padding: "4px",
+                            color: "white",
+                            fontSize: "11px",
+                            textOverflow: "ellipsis",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {getDisplayFileName(backgroundFile)}
+                        </div>
+                      </div>
+                    )}
+                  </UploadCard>
+                  {backgroundFile && (
+                    <Text
+                      type="secondary"
+                      style={{ display: "block", marginTop: "4px" }}
+                    >
+                      {Math.round(backgroundFile.size / 1024)} KB
+                    </Text>
+                  )}
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                onClick={generatePoster}
+                loading={loading}
+                disabled={!iconFile}
+                block
+                size="large"
+                icon={showPreview ? <RedoOutlined /> : <EyeOutlined />}
+              >
+                {showPreview ? "Regenerate Preview" : "Generate Preview"}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Col>
+
+        {showPreview && (
+          <Col xs={24} md={12}>
+            <PreviewContainer>
+              <div
+                style={{ textAlign: "center", marginBottom: 24, width: "100%" }}
+              >
+                <Title level={4} style={{ margin: 0 }}>
+                  Preview
+                </Title>
+                <Divider style={{ margin: "12px 0" }} />
+              </div>
+
+              {loading ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "300px",
+                  }}
+                >
+                  <Spin size="large" />
+                  <Text style={{ marginTop: 16 }}>
+                    Generating your poster...
+                  </Text>
+                  <Progress
+                    percent={75}
+                    status="active"
+                    style={{ width: "80%", marginTop: 16 }}
+                  />
                 </div>
-              </Card>
-            </Col>
-          )}
-        </Row>
-      </Form>
-    </Card>
+              ) : previewImage ? (
+                <>
+                  <ImagePreview src={previewImage} alt="Poster Preview" />
+
+                  <div
+                    style={{
+                      marginTop: 16,
+                      textAlign: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <Title level={4} style={{ margin: 0 }}>
+                      {form.getFieldValue("title")}
+                    </Title>
+                    <Paragraph type="secondary" style={{ marginTop: 8 }}>
+                      {form.getFieldValue("note")}
+                    </Paragraph>
+                  </div>
+
+                  <Space style={{ marginTop: 24 }}>
+                    <Button
+                      type="primary"
+                      onClick={handleConfirm}
+                      icon={<CheckCircleOutlined />}
+                      size="large"
+                    >
+                      Confirm & Save
+                    </Button>
+                    <Button
+                      onClick={downloadPoster}
+                      icon={<DownloadOutlined />}
+                      size="large"
+                    >
+                      Download
+                    </Button>
+                  </Space>
+                </>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "300px",
+                  }}
+                >
+                  <PictureOutlined
+                    style={{ fontSize: "48px", color: "#d9d9d9" }}
+                  />
+                  <Text type="secondary" style={{ marginTop: 16 }}>
+                    Preview will appear here
+                  </Text>
+                </div>
+              )}
+            </PreviewContainer>
+          </Col>
+        )}
+      </Row>
+    </StyledModal>
   );
 };
 
-export default PosterGenerator;
+export default PosterModal;

@@ -11,9 +11,9 @@ const { Text } = Typography;
 
 const MessageBubble = ({ message }) => {
   const getBubbleStyle = (backgroundColor, borderColor) => ({
-    padding: "10px 15px",
-    borderRadius: "12px",
-    background: backgroundColor,
+    padding: "5px 10px",
+    borderRadius: "6px",
+    background: "#fdffff",
     border: `1.5px solid ${borderColor}`,
     color: "#000",
     maxWidth: "50%",
@@ -24,7 +24,7 @@ const MessageBubble = ({ message }) => {
     boxShadow: "0 3px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)",
     transition: "all 0.2s ease",
     animation: "fadeIn 0.3s ease",
-    transform: "translateY(-2px)",  // Subtle lift effect
+    transform: "translateY(-2px)", // Subtle lift effect
   });
 
   const timeStyle = {
@@ -36,9 +36,9 @@ const MessageBubble = ({ message }) => {
   };
 
   const renderImageMessage = () => (
-    <div 
+    <div
       style={getBubbleStyle(
-        "linear-gradient(145deg, #f8f9fa, #ffffff)", 
+        "linear-gradient(145deg, #f8f9fa, #ffffff)",
         "rgba(0,0,0,0.08)"
       )}
     >
@@ -82,9 +82,9 @@ const MessageBubble = ({ message }) => {
   );
 
   const renderVoiceMessage = () => (
-    <div 
+    <div
       style={getBubbleStyle(
-        "linear-gradient(145deg, #f0f1f3, #ffffff)", 
+        "linear-gradient(145deg, #f0f1f3, #ffffff)",
         "rgba(0,0,0,0.06)"
       )}
     >
@@ -123,7 +123,9 @@ const MessageBubble = ({ message }) => {
             }}
           ></div>
         </div>
-        <Text style={{ color: "#333", fontWeight: 500 }}>{message.duration}</Text>
+        <Text style={{ color: "#333", fontWeight: 500 }}>
+          {message.duration}
+        </Text>
       </div>
       <div
         style={{
@@ -139,9 +141,9 @@ const MessageBubble = ({ message }) => {
   );
 
   const renderDocumentMessage = () => (
-    <div 
+    <div
       style={getBubbleStyle(
-        "linear-gradient(145deg, #f4f5f7, #ffffff)", 
+        "linear-gradient(145deg, #f4f5f7, #ffffff)",
         "rgba(0,0,0,0.07)"
       )}
       className="w-full"
@@ -187,7 +189,7 @@ const MessageBubble = ({ message }) => {
                 style={{ color: "#2D55FF", fontSize: "16px" }}
               />
             }
-            style={{ 
+            style={{
               backgroundColor: "rgba(45, 85, 255, 0.1)",
               border: "1px solid rgba(45, 85, 255, 0.2)",
             }}
@@ -220,9 +222,9 @@ const MessageBubble = ({ message }) => {
   );
 
   const renderTextMessage = () => (
-    <div 
+    <div
       style={getBubbleStyle(
-        "linear-gradient(145deg, #f5f6f8, #ffffff)", 
+        "linear-gradient(145deg, #f5f6f8, #ffffff)",
         "rgba(0,0,0,0.05)"
       )}
     >
