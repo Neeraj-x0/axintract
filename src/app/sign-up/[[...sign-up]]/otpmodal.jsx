@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Flex, Input, Typography, Button, message } from "antd";
+import axios from "axios";
+import { API_URL } from "@/constants";
 
-const { Title, Text } = Typography;
+const { Title, Text, Link } = Typography;
 
 const OtpVerificationModal = ({
   visible,
@@ -12,6 +14,32 @@ const OtpVerificationModal = ({
 }) => {
   const [otpValue, setOtpValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  useEffect(() => {
+    let interval;
+    // Start timer when modal becomes visible
+    if (visible && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+    }
+
+    // Clear interval when component unmounts or timer reaches 0
+    return () => {
+      clearInterval(interval);
+    };
+  }, [visible, timer]);
+
+  // Initialize timer when modal becomes visible
+  useEffect(() => {
+    if (visible) {
+      setTimer(60); // 1 minute timer
+    } else {
+      setTimer(0);
+    }
+  }, [visible]);
 
   const onChange = (value) => {
     setOtpValue(value);
@@ -38,6 +66,28 @@ const OtpVerificationModal = ({
   const handleCancel = () => {
     setOtpValue(""); // Reset OTP value when closing
     onCancel();
+  };
+
+  const handleResendCode = async () => {
+    setResendLoading(true);
+    try {
+      // Call your API endpoint to resend verification code
+      const res=await axios.post(`${API_URL}/auth/resendVerification`, { email });
+      console.log("Resend response:", res.data);
+      message.success("Verification code resent successfully!");
+      setTimer(60); // Reset timer to 1 minute
+    } catch (error) {
+      message.error("Failed to resend verification code. Please try again.");
+      console.error("Resend error:", error);
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   return (
@@ -93,9 +143,27 @@ const OtpVerificationModal = ({
           disabled={otpValue.length !== 6}
           block
           size="large"
+          style={{ marginBottom: "16px" }}
         >
           Verify
         </Button>
+
+        <Flex align="center" justify="center">
+          <Text type="secondary" style={{ marginRight: "8px" }}>
+            Didn't receive the code?
+          </Text>
+          {timer > 0 ? (
+            <Text type="secondary">Resend in {formatTime(timer)}</Text>
+          ) : (
+            <Link
+              onClick={handleResendCode}
+              disabled={resendLoading}
+              style={{ cursor: resendLoading ? "not-allowed" : "pointer" }}
+            >
+              {resendLoading ? "Sending..." : "Resend Code"}
+            </Link>
+          )}
+        </Flex>
       </Flex>
     </Modal>
   );

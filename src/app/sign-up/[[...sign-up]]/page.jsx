@@ -1,18 +1,17 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { useClerk, useSignUp } from "@clerk/nextjs";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { API_URL } from "@/constants";
 import OtpVerificationModal from "./otpmodal";
+import toast from "react-hot-toast";
+import { red } from "@cloudinary/url-gen/actions/adjust";
 const SignUpPage = () => {
-  const { isSignedIn, loaded } = useClerk();
-  const { signUp } = useSignUp();
   const router = useRouter();
 
   // State Management with improved organization
@@ -109,60 +108,35 @@ const SignUpPage = () => {
       setIsLoading(false);
       return;
     }
-
-    try {
-      const signUpAttempt = await signUp.create({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        emailAddress: formData.email,
+    axios
+      .post(`${API_URL}/auth/signup`, {
+        email: formData.email,
         password: formData.password,
+        name: formData.firstName+formData.lastName,
+        phoneNumber: "+91"+formData.phoneNumber,
+        companyName: formData.companyName,
+      })
+      .then((response) => {
+        setCookie("jwt", response.data.jwt, { path: "/" });
+        setShowOtpModal(true);
+        setIsLoading(false);
+        setModalError("");
+        setError("");
       });
-
-      // Parallel API call for better performance
-
-      const emailVerificationPromise =
-        signUpAttempt.prepareEmailAddressVerification();
-
-      // Wait for both operations to complete
-      await Promise.all([emailVerificationPromise]);
-
-      // Show OTP verification modal
-      setShowOtpModal(true);
-    } catch (err) {
-      // More detailed error handling
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "API connection failed");
-      } else if (err.errors && err.errors.length > 0) {
-        setError(err.errors[0].message);
-      } else {
-        setError("Sign-up failed. Please try again.");
-      }
-      console.error("Sign-up error:", err);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleVerify = async (otp) => {
     try {
-      await signUp.attemptEmailAddressVerification({ code: otp });
       setModalError("");
-      await axios.post(
-        `${API_URL}/api/user`,
+      const res=await axios.post(
+        `${API_URL}/auth/verifyEmail`,
         {
-          name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
-          companyName: formData.companyName,
-          phoneNumber: formData.phoneNumber,
-          password: formData.password,
+          verificationCode: otp,
         },
-        {
-          headers: {
-            Authorization: `signupSuccess`,
-          },
-        }
       );
-      router.push("/user/dashboard");
+      toast.success(res.data.message);
+      redirect("/sign-in");
     } catch (err) {
       setError("Verification failed. Please try again.");
       setModalError("Verification failed. Please try again.");
@@ -184,21 +158,22 @@ const SignUpPage = () => {
     [error]
   );
 
+
   // Efficient redirect logic
-  useEffect(() => {
-    if (loaded && isSignedIn) {
-      router.push("/user/dashboard");
-    }
-  }, [loaded, isSignedIn, router]);
+  // useEffect(() => {
+  //   if (loaded && isSignedIn) {
+  //     router.push("/user/dashboard");
+  //   }
+  // }, [loaded, isSignedIn, router]);
 
   // Early return during loading state
-  if (!loaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  // if (!loaded) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-white">
+  //       <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen flex bg-white">

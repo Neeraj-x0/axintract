@@ -3,6 +3,7 @@ import "./globals.css";
 import Providers from "./providers";
 import PropTypes from "prop-types";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
         <body
           className={`${geistSans.variable} ${comfortaa.variable} ${geistMono.variable} antialiased text-gray-900 bg-white dark:text-white`}
         >
+          <Toaster/>
           <Providers>{children}</Providers>
         </body>
       </html>

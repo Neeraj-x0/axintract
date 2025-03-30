@@ -6,15 +6,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useCookies } from "react-cookie";
-import { useClerk, useSignIn, useAuth } from "@clerk/nextjs";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const SignInPage = () => {
-  const { signOut } = useAuth();
   const [cookies, setCookie] = useCookies();
-  const { isSignedIn, loaded } = useClerk();
-  const { signIn, setActive } = useSignIn();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,64 +46,24 @@ const SignInPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const authResponse = await signInUser(email, password);
-
-      // Contemplative Pathway: Direct Token Response Handling
-      if (authResponse.token) {
-        setCookie("token", authResponse.token);
-        router.push("/user/dashboard");
-      } else {
-        // Precise Error Propagation
-        setError(authResponse.message || "Authentication failed");
-      }
-    } catch (err) {
-      // Minimalist Error Capture
-      setError(
-        err.response?.data?.message || "Unexpected authentication error"
-      );
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInUser = async (identifier, password) => {
-    try {
-      // Authentication Attempt: Precise Credential Validation
-      const clerkSignIn = await signIn.create({
-        identifier,
+    axios
+      .post(`${API_URL}/auth/signin`, {
+        email,
         password,
-        strategy: "password",
+      })
+      .then((response) => { 
+        toast.success(response.data.message);
+        setCookie("token", response.data.token, { path: "/user/dashboard" });
+        router.push("/user/dashboard");
+      })
+      .catch((error) => {
+        setError(error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-
-      // Direct Token Generation Endpoint
-      const tokenResponse = await axios.post(`${API_URL}/token/create`, {
-        sessionId: clerkSignIn.createdSessionId,
-        password: password,
-      });
-
-      // Immediate Token Extraction
-      return {
-        token: tokenResponse.data.data.token,
-        message: tokenResponse.data.message,
-      };
-    } catch (err) {
-      // Streamlined Error Propagation
-      return {
-        token: null,
-        message: err.response?.data?.message || "Authentication failed",
-      };
-    }
   };
-  useEffect(() => {
-    if (isSignedIn) {
-      router.push("/user/dashboard");
-    }
-  }, [isSignedIn]);
+
 
   return (
     <div className="min-h-screen flex bg-white">

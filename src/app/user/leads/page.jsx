@@ -9,15 +9,14 @@ import React, {
 import { usePathname } from "next/navigation";
 import Header from "./Header";
 import AddLeadsPopup from "./AddLeadsPopup";
-import useAxios from "../../../lib";
 import LeadsControls from "./LeadsControler";
 import LeadsTable from "./LeadTable";
 import { Typography, Spin, Alert, ConfigProvider, theme, Row, Col } from "antd";
 import { LoadingOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-
-const { Title } = Typography;
+import useAxios from "@/lib"
 
 const LeadsDashboard = () => {
+  const { Title } = Typography;
   const axios = useAxios();
   const currentRoute = usePathname();
   const listRef = useRef(null);
@@ -74,7 +73,7 @@ const LeadsDashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`/api/lead`, {
+      const response = await axios.get(`/api/leads`, {
         params: { page, limit: leadsPerPage },
       });
 
