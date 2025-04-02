@@ -32,7 +32,6 @@ import {
   EnvironmentOutlined
 } from "@ant-design/icons";
 import { useParams } from "next/navigation";
-import useAxios from "../../../../lib";
 import Axios from "axios";
 
 const { Title, Text } = Typography;
@@ -126,27 +125,19 @@ const LeadManagement = () => {
     // Cleanup
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
+// Fetching Individual leads data
   useEffect(() => {
     const initializeData = async () => {
       setIsLoading(true);
       try {
-        // In a real app, you would fetch this data from the API
-        // Simulating API response with timeout
-        setTimeout(() => {
-          setLead(prevLead => ({
-            ...prevLead,
-            id: slug || "lead-123456",
-            name: "Robert Maxwell",
-            status: "Qualified",
-            category: "Enterprise",
-            email: "robert.maxwell@company.com",
-            phone: "+1 (555) 123-4567",
-            company: "Maxwell Industries"
-          }));
+        const response = await axios.get(`api/leads/${slug}`);
+        if (response.status === 200) {
+          setLead(response.data);
           setIsLoading(false);
-        }, 800);
-        
+        } else {
+          setError("Failed to fetch data. Please try again.");
+          setIsLoading(false);
+        }        
       } catch (error) {
         if (Axios.isAxiosError(error) && error.response?.status === 400) {
           setIsNotFound(true);
